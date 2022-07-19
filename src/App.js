@@ -13,7 +13,7 @@ function App() {
     <div className="App">
       <div className="title-row">
         <h1 className="title">VGP recipes</h1>
-        <LoginForm></LoginForm>
+        <LoginForm existingUser={user}></LoginForm>
       </div>
     </div>
   );

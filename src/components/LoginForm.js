@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FirebaseAuthService from '../FirebaseAuthService';
 
-function LoginForm( {existingUser}) {
+function LoginForm({ existingUser }) {
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    console.log(existingUser); 
+  }, [existingUser])
 
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      await FirebaseAuthService.registerUser(username, password);
+      await FirebaseAuthService.loginUser(username, password);
       setUserName('');
       setPassword('');
     } catch (error) {
