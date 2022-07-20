@@ -12,7 +12,7 @@ function App() {
   return (
     <div className="App">
       <div className="title-row">
-        <h1 className="title">VGP **</h1>
+        <h1 className="title">VGP</h1>
         <LoginForm existingUser={user}></LoginForm>
       </div>
     </div>
