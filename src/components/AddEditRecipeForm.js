@@ -10,6 +10,29 @@ function AddEditRecipeForm({ handleAddRecipe }) {
   const [ingredients, setIngredients] = useState([]);
   const [ingredientName, setIngredientName] = useState([]);
 
+  function handleRecipeFormSubmit(e) {
+    e.preventDefault();
+    if (ingredients.length === 0) {
+      alert(
+        'Ingredients cannot be empty. Add at least one ingredient'
+      );
+    }
+    const isPublished =
+      new Date(publishDate) <= new Date() ? true : false;
+
+    const newRecipe = {
+      name,
+      category,
+      directions,
+      publishDate: new Date(publishDate),
+      isPublished,
+      ingredients,
+    };
+
+    handleAddRecipe(newRecipe);
+    console.log('after function handleAddRecipe')
+  }
+
   function handleAddIngredient(e) {
     if (e.key && e.key !== 'Enter') {
       return;
@@ -26,7 +49,10 @@ function AddEditRecipeForm({ handleAddRecipe }) {
   }
 
   return (
-    <form className="add-edit-recipe-form-container">
+    <form
+      onSubmit={handleRecipeFormSubmit}
+      className="add-edit-recipe-form-container"
+    >
       <h2>Add a New Recipe</h2>
       <div className="top-form-section">
         <div className="fields">
@@ -45,8 +71,9 @@ function AddEditRecipeForm({ handleAddRecipe }) {
             Category:
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.event)}
+              onChange={(e) => setCategory(e.target.value)}
               className="select"
+              required
             >
               <option value=""></option>
               <option value="breadsSandwichesAndPizza">
@@ -95,22 +122,24 @@ function AddEditRecipeForm({ handleAddRecipe }) {
               <th className="table-header">Delete</th>
             </tr>
           </thead>
-              {ingredients && ingredients.length > 0
-                ? ingredients.map((ingredient) => {
-                    return (
-                      <tr key={ingredient}>
-                        <td className="table-data text-center">
-                          {ingredient}
-                        </td>
-                        <td className="ingredient-delete-box">
-                          <button className="secondary-button ingredient-delete-button">
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                : null}
+          <tbody>
+            {ingredients && ingredients.length > 0
+              ? ingredients.map((ingredient) => {
+                  return (
+                    <tr key={ingredient}>
+                      <td className="table-data text-center">
+                        {ingredient}
+                      </td>
+                      <td className="ingredient-delete-box">
+                        <button className="secondary-button ingredient-delete-button">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              : null}
+          </tbody>
         </table>
 
         {ingredients && ingredients.length === 0 ? (
@@ -140,6 +169,14 @@ function AddEditRecipeForm({ handleAddRecipe }) {
             Add Ingredient
           </button>
         </div>
+      </div>
+      <div className="action-buttons">
+        <button
+          type="submit"
+          className="primary-button action-button"
+        >
+          Publish
+        </button>
       </div>
     </form>
   );

@@ -6,20 +6,24 @@ import AddEditRecipeForm from './components/AddEditRecipeForm';
 import FirebaseFirestoreService from './FirebaseFirestoreService';
 
 function App() {
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
 
-  FirebaseAuthService.subscribeToAuthChanges(setUser); 
+  FirebaseAuthService.subscribeToAuthChanges(setUser);
 
-  async function handleAddRecipe(newRecipe){
+  async function handleAddRecipe(newRecipe) {
+    console.log(newRecipe, 'New recipe from the handleAddRecipe');
     try {
-      const response = await FirebaseFirestoreService.createDocument(newRecipe); 
+      console.log('Before creating document');
+      const response = await FirebaseFirestoreService.createDocument(
+        'recipes',
+        newRecipe
+      );
+      console.log(response)
       //Todo: fetch new recipes from firestore
-      alert(`succesfully created new recipe with an Id ${response.id}`)
-
-
-    } catch (error) {
-      
-    }
+      alert(
+        `succesfully created new recipe with an Id ${response.id}`
+      );
+    } catch (error) {}
   }
 
   return (
@@ -28,8 +32,8 @@ function App() {
         <h1 className="title">VGP</h1>
         <LoginForm existingUser={user}></LoginForm>
       </div>
-      <div className='main'>
-        <AddEditRecipeForm 
+      <div className="main">
+        <AddEditRecipeForm
           handleAddRecipe={handleAddRecipe}
         ></AddEditRecipeForm>
       </div>

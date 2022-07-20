@@ -36,13 +36,13 @@ function LoginForm({ existingUser }) {
     }
   }
 
-  // async function handleLoginWithGoogle() {
-  //   try {
-  //     await FirebaseAuthService.loginWithGoogle();
-  //   } catch (error) {
-  //     setError(error.message);
-  //   }
-  // }
+  async function handleLoginWithGoogle() {
+    try {
+      await FirebaseAuthService.loginWithGoogle();
+    } catch (error) {
+      setError(error.message);
+    }
+  }
 
   return (
     <div className="login-form-container">
@@ -83,13 +83,13 @@ function LoginForm({ existingUser }) {
             <button className="primary-button" type="submit">
               Login
             </button>
-            {/* <button
+            <button
               className="primary-button"
               type="button"
               onClick={handleLoginWithGoogle}
             >
               Login with Google
-            </button> */}
+            </button>
             <button
               className="primary-button"
               type="button"
