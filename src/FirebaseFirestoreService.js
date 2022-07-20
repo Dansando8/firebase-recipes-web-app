@@ -6,8 +6,13 @@ const createDocument = (collection, document) => {
   return firestore.collection(collection).add(document);
 };
 
-const FirebaseFirestoreService = {
-  createDocument,
+const readDocuments = (collection) => {
+  return firestore.collection(collection).get();
 };
 
-export default FirebaseFirestoreService; 
+const FirebaseFirestoreService = {
+  createDocument,
+  readDocuments,
+};
+
+export default FirebaseFirestoreService;
