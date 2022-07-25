@@ -7,6 +7,7 @@ import FirebaseFirestoreService from './FirebaseFirestoreService';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [currentRecipe, setCurrentRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ function App() {
         console.error(error.message);
         throw error;
       });
-  });
+  }, [user]);
 
   FirebaseAuthService.subscribeToAuthChanges(setUser);
 
@@ -63,7 +64,6 @@ function App() {
     }
   }
 
-  console.log(recipes);
   async function handleAddRecipe(newRecipe) {
     console.log(newRecipe, 'New recipe from the handleAddRecipe');
     try {
@@ -79,6 +79,64 @@ function App() {
     } catch (error) {
       console.error(error.message);
     }
+  }
+
+  async function handleUpdateRecipe(newRecipe, recipeId) {
+    try {
+      await FirebaseFirestoreService.updateDocument(
+        'recipes',
+        recipeId,
+        newRecipe
+      );
+
+      handleFetchedRecipes();
+
+      alert(`successfully updated a recipe with an ID = ${recipeId}`);
+      setCurrentRecipe(null);
+    } catch (error) {
+      alert(error.message);
+      throw error;
+    }
+  }
+
+  async function handleDeleteRecipe(recipeId) {
+    const deleteConfirmation = window.confirm(
+      'Are you sure want to delete this recipe? OK for yes. Cancel for No.'
+    );
+    if (deleteConfirmation) {
+      try {
+        await FirebaseFirestoreService.deleteDocument(
+          'recipes',
+          recipeId
+        );
+
+        handleFetchedRecipes();
+
+        setCurrentRecipe(null);
+
+        window.scrollTo(0, 0);
+
+        alert(`Succesfully deleted recipe with ID: ${recipeId}`);
+      } catch (error) {
+        alert(error.message);
+        throw error;
+      }
+    }
+  }
+
+  function handleEditRecipeClick(recipeId) {
+    const selectedRecipe = recipes.find((recipe) => {
+      return recipe.id === recipeId;
+    });
+    if (selectedRecipe) {
+      setCurrentRecipe(selectedRecipe);
+      console.log('just before scrolling');
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  }
+
+  function handleEditRecipeCancel() {
+    setCurrentRecipe(null);
   }
 
   function lookupCategoryLabel(categoryKey) {
@@ -128,6 +186,17 @@ function App() {
                       <div className="recipe-field">
                         Publish Date: {formatDate(recipe.publishDate)}
                       </div>
+                      {user ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEditRecipeClick(recipe.id)
+                          }
+                          className="primary-button edit-button"
+                        >
+                          EDIT
+                        </button>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -137,7 +206,11 @@ function App() {
         </div>
         {user ? (
           <AddEditRecipeForm
+            existingRecipe={currentRecipe}
             handleAddRecipe={handleAddRecipe}
+            handleUpdateRecipe={handleUpdateRecipe}
+            handleDeleteRecipe={handleDeleteRecipe}
+            handleEditRecipeCancel={handleEditRecipeCancel}
           ></AddEditRecipeForm>
         ) : null}
       </div>
