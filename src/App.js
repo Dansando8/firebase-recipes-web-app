@@ -9,8 +9,11 @@ function App() {
   const [user, setUser] = useState(null);
   const [currentRecipe, setCurrentRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
+  const [isLoading, SetIsLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   useEffect(() => {
+    SetIsLoading(true);
     fetchRecipes()
       .then((fetchedRecipes) => {
         setRecipes(fetchedRecipes);
@@ -18,13 +21,24 @@ function App() {
       .catch((error) => {
         console.error(error.message);
         throw error;
+      })
+      .finally(() => {
+        SetIsLoading(false);
       });
-  }, [user]);
+  }, [user, categoryFilter]);
 
   FirebaseAuthService.subscribeToAuthChanges(setUser);
 
   async function fetchRecipes() {
     const queries = [];
+
+    if (categoryFilter) {
+      queries.push({
+        field: 'category',
+        condition: '==',
+        value: categoryFilter,
+      });
+    }
 
     if (!user) {
       queries.push({
@@ -166,8 +180,46 @@ function App() {
         <LoginForm existingUser={user}></LoginForm>
       </div>
       <div className="main">
+        <div className="row filters">
+          <label className="recipe-label input-label">
+            Category:
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="select"
+              required
+            >
+              <option value=""></option>
+              <option value="breadsSandwichesAndPizza">
+                Breads, Sandwiches & Pizza
+              </option>
+              <option value="eggsAndBreakfast">
+                Eggs & Breakfast
+              </option>
+              <option value="dessertsAndBakedGoods">
+                Desserts & Baked Goods
+              </option>
+              <option value="fishAndSeaFood">Fish & Sea Food</option>
+              <option value="vegetables">Vegetables</option>
+            </select>
+          </label>
+        </div>
         <div className="center">
           <div className="recipe-list-box">
+            {isLoading ? (
+              <div className="fire">
+                <div className="flames">
+                  <div className="flame"></div>
+                  <div className="flame"></div>
+                  <div className="flame"></div>
+                  <div className="flame"></div>
+                </div>
+                <div className="logs"></div>
+              </div>
+            ) : null}
+            {!isLoading && recipes && recipes.length === 0 ? (
+              <h5 className="no-recipes">No recipes found</h5>
+            ) : null}
             {recipes && recipes.length > 0 ? (
               <div className="recipe-list">
                 {recipes.map((recipe) => {
