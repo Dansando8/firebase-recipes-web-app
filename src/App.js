@@ -12,7 +12,7 @@ function App() {
   const [isLoading, SetIsLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [orderBy, setOrderBy] = useState('publishDateDesc');
-  const [recipesPerPage, setRecipesPerPage] = useState(3)
+  const [recipesPerPage, setRecipesPerPage] = useState(3);
 
   useEffect(() => {
     SetIsLoading(true);
@@ -27,6 +27,7 @@ function App() {
       .finally(() => {
         SetIsLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, categoryFilter, orderBy, recipesPerPage]);
 
   FirebaseAuthService.subscribeToAuthChanges(setUser);
@@ -54,13 +55,15 @@ function App() {
     let orderByDirection;
 
     if (orderBy) {
-      switch(orderBy) {
-        case 'publishDateAsc': orderByDirection = "asc";
-        break; 
-        case 'publishDateDesc': orderByDirection = "desc";
-        break; 
-        default: 
-        break; 
+      switch (orderBy) {
+        case 'publishDateAsc':
+          orderByDirection = 'asc';
+          break;
+        case 'publishDateDesc':
+          orderByDirection = 'desc';
+          break;
+        default:
+          break;
       }
     }
 
@@ -69,10 +72,10 @@ function App() {
       const response = await FirebaseFirestoreService.readDocuments({
         collection: 'recipes',
         queries: queries,
-        orderByField: orderByField, 
+        orderByField: orderByField,
         orderByDirection: orderByDirection,
-        perPage: recipesPerPage, 
-        cursorId : cursorId, 
+        perPage: recipesPerPage,
+        cursorId: cursorId,
       });
       const newRecipes = response.docs.map((recipeDoc) => {
         const id = recipeDoc.id;
@@ -81,12 +84,11 @@ function App() {
         return { ...data, id };
       });
 
-      if(cursorId){
+      if (cursorId) {
         fetchedRecipes = [...recipes, ...newRecipes];
       } else {
         fetchedRecipes = [...newRecipes];
       }
-
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -94,19 +96,19 @@ function App() {
     return fetchedRecipes;
   }
 
-  function handleRecipesPerPageChange(event){
-    const recipesPerPage = event.target.value; 
-    setRecipes([]); 
-    setRecipesPerPage(recipesPerPage)
+  function handleRecipesPerPageChange(event) {
+    const recipesPerPage = event.target.value;
+    setRecipes([]);
+    setRecipesPerPage(recipesPerPage);
   }
 
-  function handleLoadMoreRecipesClick(){
-    const lastRecipe = recipes[recipes.length -1]; 
-    const cursorId = lastRecipe.id; 
+  function handleLoadMoreRecipesClick() {
+    const lastRecipe = recipes[recipes.length - 1];
+    const cursorId = lastRecipe.id;
     handleFetchedRecipes(cursorId);
   }
 
-  async function handleFetchedRecipes(cursorId = "") {
+  async function handleFetchedRecipes(cursorId = '') {
     try {
       const fetchedRecipes = await fetchRecipes(cursorId);
       setRecipes(fetchedRecipes);
@@ -242,13 +244,19 @@ function App() {
             </select>
           </label>
           <label className="input-label">
-            <select 
-            value={orderBy}
-            onChange={(e) => setOrderBy(e.target.value)}
-            className="select"
-            > 
-            <option value="publishDateDesc"> Publish Date (newest - oldest) </option>
-            <option value="publishDateAsc"> Publish Date (oldest - newest) </option>
+            <select
+              value={orderBy}
+              onChange={(e) => setOrderBy(e.target.value)}
+              className="select"
+            >
+              <option value="publishDateDesc">
+                {' '}
+                Publish Date (newest - oldest){' '}
+              </option>
+              <option value="publishDateAsc">
+                {' '}
+                Publish Date (oldest - newest){' '}
+              </option>
             </select>
           </label>
         </div>
@@ -279,6 +287,17 @@ function App() {
                         </div>
                       ) : null}
                       <div className="recipe-name">{recipe.name}</div>
+                      <div className="recipe-image-box">
+                        {
+                          recipe.imageUrl ? (
+                            <img 
+                              src={recipe.imageUrl}
+                              alt={recipe.name}
+                              className="recipe-image"
+                            />
+                          ) : (null)
+                        }
+                      </div>
                       <div className="recipe-field">
                         Category:{' '}
                         {lookupCategoryLabel(recipe.category)}
@@ -304,11 +323,10 @@ function App() {
             ) : null}
           </div>
         </div>
-        {
-          isLoading || (recipes && recipes.length > 0 )  ? (
-            <>
-            <label className='input-label'>
-              Recipes Per Page : 
+        {isLoading || (recipes && recipes.length > 0) ? (
+          <>
+            <label className="input-label">
+              Recipes Per Page :
               <select
                 value={recipesPerPage}
                 onChange={handleRecipesPerPageChange}
@@ -320,11 +338,16 @@ function App() {
               </select>
             </label>
             <div className="pagination">
-              <button type="button" onClick={handleLoadMoreRecipesClick} className="primary-button">LOAD MORE RECIPES</button>
+              <button
+                type="button"
+                onClick={handleLoadMoreRecipesClick}
+                className="primary-button"
+              >
+                LOAD MORE RECIPES
+              </button>
             </div>
-            </>
-          ) : null
-        }
+          </>
+        ) : null}
         {user ? (
           <AddEditRecipeForm
             existingRecipe={currentRecipe}
