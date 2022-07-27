@@ -121,9 +121,43 @@ exports.onUpdateRecipe = functions.firestore
     }
   });
 
-const runtimeOptions = {
-  timeoutSeconde: 300, 
-  memory: "256MB", 
-}
+//https://crontab.guru/
 
-exports.dailyCheckRecipePublishDate = functions.runWith(runtimeOptions); 
+const runtimeOptions = {
+  timeoutSeconde: 300,
+  memory: '256MB',
+};
+
+exports.dailyCheckRecipePublishDate = functions
+  .runWith(runtimeOptions)
+  .pubsub.schedule('0 0 * * *')
+  .onRun(async () => {
+    console.log(
+      'dailyCheckRecipePublishDate() called - time to check'
+    );
+    const snapshot = await firestore
+      .collection('recipes')
+      .where('isPublished', '==', false)
+      .get();
+
+    snapshot.forEach(async (doc) => {
+      const data = doc.data();
+      const now = Date.now() / 1000;
+      const isPublished =
+        data.publishDate._seconds <= now ? true : false;
+
+      if (isPublished) {
+        console.log(`Recipe: ${data.name} is now published`);
+        firestore.collection('recipes').doc(doc.id).set(
+          {
+            isPublished,
+          },
+          {
+            merge: true,
+          }
+        );
+      }
+    });
+  });
+
+console.log("SERVER STARTED 🚀")
