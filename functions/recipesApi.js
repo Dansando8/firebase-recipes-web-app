@@ -11,9 +11,10 @@ const firestore = FirebaseConfig.firestore;
 const app = express();
 
 app.use(cors({ origin: true }));
+
 app.use(bodyParser.json());
 
-// RESTFUL CRUD WEB API ENDPOINTS
+// ~~ RESTFUL CRUD WEB API ENDPOINTS ~~
 
 app.post('/recipes', async (request, response) => {
   const authorizationHeader = request.headers['authorization'];
@@ -48,7 +49,9 @@ app.post('/recipes', async (request, response) => {
     const firestoreResponse = await firestore
       .collection('recipes')
       .add(recipe);
+
     const recipeId = firestoreResponse.id;
+
     response.status(201).send({ id: recipeId });
   } catch (error) {
     response.status(400).send(error.message);
@@ -79,6 +82,7 @@ app.get('/recipes', async (request, response) => {
 
   try {
     await Utilities.authorizeUser(authorizationHeader, auth);
+
     isAuth = true;
   } catch (error) {
     collectionRef = collectionRef.where('isPublished', '==', true);
@@ -100,114 +104,121 @@ app.get('/recipes', async (request, response) => {
   }
 
   if (pageNumber > 0 && perPage) {
-    const pageNumberMultiplier = (pageNumber = 1);
+    const pageNumberMultiplier = pageNumber - 1;
     const offset = pageNumberMultiplier * perPage;
     collectionRef = collectionRef.offset(offset);
   }
 
-  let recipeCount = 0; 
-  let countDocRef; 
+  let recipeCount = 0;
+  let countDocRef;
 
-  if(isAuth){
-    countDocRef = firestore.collection("recipeCounts").doc("all"); 
+  if (isAuth) {
+    countDocRef = firestore.collection('recipeCounts').doc('all');
   } else {
-    countDocRef = firestore.collection("recipeCounts").doc("published"); 
+    countDocRef = firestore
+      .collection('recipeCounts')
+      .doc('published');
   }
 
-  const countDoc = await countDocRef.get(); 
-  
-  if(countDoc.exists){
-    const countDocData  = countDoc.data(); 
-    if(countDocData){
-      recipeCount = countDocData.count
+  const countDoc = await countDocRef.get();
+
+  if (countDoc.exists) {
+    const countDocData = countDoc.data();
+
+    if (countDocData) {
+      recipeCount = countDocData.count;
     }
   }
 
   try {
-    const firestoreResponse = await collectionRef.get(); 
-    const fetchedRecipes = firestoreResponse.docs.map((recipe) => {
-      const id = recipe.id; 
-      const data = recipe.data(); 
+    const firestoreResponse = await collectionRef.get();
+    const fetchedRecipes = firestoreResponse.docs.map((recipe) => {
+      const id = recipe.id;
+      const data = recipe.data();
       data.publishDate = data.publishDate._seconds;
 
-      return {...data, id}
+      return { ...data, id };
     });
 
     const payload = {
-      recipeCount, 
-      documents : fetchedRecipes,
-    }
+      recipeCount,
+      documents: fetchedRecipes,
+    };
 
-    response.status(200).send(payload)
-
+    response.status(200).send(payload);
   } catch (error) {
-    response.statur(400).send(error.message)
+    response.status(400).send(error.message);
   }
-
 });
 
-app.put("/recipes/:id", async (request, response) => {
-  const authorizationHeader = request.headers["authorization"]; 
+app.put('/recipes/:id', async (request, response) => {
+  const authorizationHeader = request.headers['authorization'];
 
-  if(!authorizationHeader){
-    response.status(401).send("Missing Authorization Header")
+  if (!authorizationHeader) {
+    response.status(401).send('Missing Authorization Header');
     return;
   }
 
   try {
-    await Utilities.authorizeUser(authorizationHeader, auth); 
+    await Utilities.authorizeUser(authorizationHeader, auth);
   } catch (error) {
-    response.status(401).send(error.message); 
-    return; 
+    response.status(401).send(error.message);
+    return;
   }
 
-  const id = request.params.id; 
-  const newRecipe = request.body; 
-  const missingFields = Utilities.validateRecipePostPut(newRecipe); 
+  const id = request.params.id;
+  const newRecipe = request.body;
+  const missingFields = Utilities.validateRecipePostPut(newRecipe);
 
-  if(missingFields){
-    response.status(400).send(`Recipe is not valid. Missing/invalid fields: ${missingFields}`); 
-    return; 
+  if (missingFields) {
+    response
+      .status(400)
+      .send(
+        `Recipe is not valid. Missing/invalid fields: ${missingFields}`
+      );
+    return;
   }
 
-  const recipe = Utilities.sanitizeRecipePostPut(newRecipe); 
+  const recipe = Utilities.sanitizeRecipePostPut(newRecipe);
 
   try {
-    await firestore.collection("recipes").doc(id).set(recipe); 
+    await firestore.collection('recipes').doc(id).set(recipe);
+
     response.status(200).send({ id });
   } catch (error) {
-    response.status(400).send(error.message)
+    response.status(400).send(error.message);
   }
+});
 
-})
+app.delete('/recipes/:id', async (request, response) => {
+  const authorizationHeader = request.headers['authorization'];
 
-app.delete("/recipes/:id", async (request, response)=> {
-  const authorizationHeader = request.headers["authorization"]; 
-
-  if(!authorizationHeader){
-    response.status(401).send("Missing Authorization Header"); 
-    return; 
+  if (!authorizationHeader) {
+    response.status(401).send('Missing Authorization Header');
+    return;
   }
 
   try {
-    await Utilities.authorizeUser(authorizationHeader, auth)
+    await Utilities.authorizeUser(authorizationHeader, auth);
   } catch (error) {
-    response.send(401).send(error.message); 
+    response.status(401).send(error.message);
   }
 
-  const id = request.params.id
+  const id = request.params.id;
 
   try {
-    await firestore.collection("recipes").doc(id).delete();
+    await firestore.collection('recipes').doc(id).delete();
+    response.status(200).send();
   } catch (error) {
-    response.status(400).send(error.message); 
+    response.status(400).send(error.message);
   }
-
-})
+});
 
 if (process.env.NODE_ENV !== 'production') {
-  //Local dev
+  // Local dev
   app.listen(3005, () => {
-    console.log("api started 👾 on 'http://localhost:3005");
+    console.log('api started');
   });
 }
+
+module.exports = app;
