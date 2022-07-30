@@ -3,7 +3,7 @@ const authorizeUser = async (authorizationHeader, firebaseAuth) => {
     // eslint-disable-next-line no-throw-literal
     throw 'no authorization provided';
   }
-  const token = authorizationHeader.split('')[1];
+  const token = authorizationHeader.split(' ')[1];
 
   try {
     const decodedToken = await firebaseAuth.verifyIdToken(token);
