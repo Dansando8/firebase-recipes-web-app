@@ -4,6 +4,7 @@ import './App.css';
 import LoginForm from './components/LoginForm';
 import AddEditRecipeForm from './components/AddEditRecipeForm';
 import FirebaseFirestoreService from './FirebaseFirestoreService';
+import FirebaseFirestoreRestService from './FirebaseFirestoreRestService';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -121,11 +122,16 @@ function App() {
   async function handleAddRecipe(newRecipe) {
     console.log(newRecipe, 'New recipe from the handleAddRecipe');
     try {
-      console.log('Before creating document');
-      const response = await FirebaseFirestoreService.createDocument(
-        'recipes',
-        newRecipe
-      );
+      // const response = await FirebaseFirestoreService.createDocument(
+      //   'recipes',
+      //   newRecipe
+
+      //REST API
+      const response =
+        await FirebaseFirestoreRestService.createDocument(
+          'recipes',
+          newRecipe
+        );
       handleFetchedRecipes();
       alert(
         `succesfully created new recipe with an Id ${response.id}`
@@ -288,15 +294,13 @@ function App() {
                       ) : null}
                       <div className="recipe-name">{recipe.name}</div>
                       <div className="recipe-image-box">
-                        {
-                          recipe.imageUrl ? (
-                            <img 
-                              src={recipe.imageUrl}
-                              alt={recipe.name}
-                              className="recipe-image"
-                            />
-                          ) : (null)
-                        }
+                        {recipe.imageUrl ? (
+                          <img
+                            src={recipe.imageUrl}
+                            alt={recipe.name}
+                            className="recipe-image"
+                          />
+                        ) : null}
                       </div>
                       <div className="recipe-field">
                         Category:{' '}

@@ -6,7 +6,7 @@ const authorizeUser = async (authorizationHeader, firebaseAuth) => {
   const token = authorizationHeader.split('')[1];
 
   try {
-    const decodedToken = await firebaseAuth.verifyToken(token);
+    const decodedToken = await firebaseAuth.verifyIdToken(token);
     return decodedToken;
   } catch (error) {
     throw error;
