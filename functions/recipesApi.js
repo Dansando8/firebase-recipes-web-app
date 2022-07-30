@@ -135,7 +135,7 @@ app.get('/recipes', async (request, response) => {
     const fetchedRecipes = firestoreResponse.docs.map((recipe) => {
       const id = recipe.id;
       const data = recipe.data();
-      data.publishDate = data.publishDate._seconds;
+      data.publishDate = data.publishDate.seconds;
 
       return { ...data, id };
     });
