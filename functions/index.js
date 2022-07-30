@@ -1,11 +1,11 @@
 const FirebaseConfig = require('./FirebaseConfig');
-const recipesApi = require('./recipesApi')
+const recipesApi = require('./recipesApi');
 const functions = FirebaseConfig.functions;
 const firestore = FirebaseConfig.firestore;
 const storageBucket = FirebaseConfig.storageBucket;
 const admin = FirebaseConfig.admin;
 
-exports.api = functions.https.onRequest(recipesApi); 
+exports.api = functions.https.onRequest(recipesApi);
 
 exports.onCreateRecipe = functions.firestore
   .document('recipes/{recipeId}')
@@ -127,7 +127,7 @@ exports.onUpdateRecipe = functions.firestore
 //https://crontab.guru/
 
 const runtimeOptions = {
-  timeoutSeconde: 300,
+  timeoutSeconds: 300,
   memory: '256MB',
 };
 
@@ -163,4 +163,4 @@ exports.dailyCheckRecipePublishDate = functions
     });
   });
 
-console.log("SERVER STARTED 🚀")
+console.log('SERVER STARTED 🚀');
